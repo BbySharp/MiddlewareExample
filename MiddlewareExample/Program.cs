@@ -1,28 +1,37 @@
+using MiddlewareExample.CustomMiddleware;
+
 var builder = WebApplication.CreateBuilder(args);
+
+// Đăng ký MyCustomMiddleware vào dịch vụ với AddTransient (tạo middleware mỗi lần cần)
+builder.Services.AddTransient<MyCustomMiddleware>();
+
 var app = builder.Build();
 
-// Middleware 1: Đây là middleware đầu tiên trong chuỗi (pipeline).
-// - Nó sẽ ghi "Hello World!" vào response.
-// - Sau đó gọi next(context) để chuyển tiếp quyền xử lý đến middleware tiếp theo.
+// Middleware 1: Middleware đầu tiên trong chuỗi.
+// - Ghi "Hello middleware!" vào response và chuyển quyền cho middleware tiếp theo.
 app.Use(async (HttpContext context, RequestDelegate next) =>
 {
     await context.Response.WriteAsync("Hello middleware!");  // Ghi thông điệp đầu tiên vào response
     await next(context);  // Chuyển quyền cho middleware tiếp theo
 }); 
 
-// Middleware 2: Middleware này chạy sau middleware đầu tiên.
-// - Nó sẽ thêm "Hello World!!" vào response và chuyển tiếp đến middleware tiếp theo.
+// Middleware 2: Middleware thứ hai trong chuỗi.
+// - Ghi "Hello middleware 2!" vào response và chuyển quyền cho middleware tiếp theo.
 app.Use(async (HttpContext context, RequestDelegate next) =>
 {
-    await context.Response.WriteAsync("Hello middleware 2!");  // Thêm thông điệp thứ hai vào response
+    await context.Response.WriteAsync("Hello middleware 2!");  // Ghi thông điệp thứ hai vào response
     await next(context);  // Chuyển quyền cho middleware tiếp theo
 }); 
 
-// Middleware cuối cùng: app.Run() không gọi next(context) và đóng vai trò như điểm kết thúc của pipeline.
-// - Nó sẽ ghi "Hello World!!!" vào response, và đây là middleware cuối cùng được thực thi.
+// Thêm MyCustomMiddleware vào chuỗi middleware.
+// - Đây là middleware tùy chỉnh được thêm vào, nó ghi thông điệp trước và sau khi next() được gọi.
+app.UseMiddleware<MyCustomMiddleware>();
+
+// Middleware cuối cùng trong chuỗi: app.Run không gọi next() và kết thúc pipeline.
+// - Ghi "Hello middleware 3!" vào response, là thông điệp cuối cùng trước khi response kết thúc.
 app.Run(async (HttpContext context) =>
 {
-    await context.Response.WriteAsync("Hello middleware 3!");  // Ghi thông điệp cuối cùng
+    await context.Response.WriteAsync("Hello middleware 3!");  // Ghi thông điệp cuối cùng vào response
 }); 
 
-app.Run();  // Khởi chạy ứng dụng
+app.Run();  //
