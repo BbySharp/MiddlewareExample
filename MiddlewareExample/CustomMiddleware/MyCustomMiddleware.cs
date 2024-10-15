@@ -12,4 +12,14 @@ namespace MiddlewareExample.CustomMiddleware
             await context.Response.WriteAsync("My custom middleware - Ends");  // Thông báo kết thúc của middleware tùy chỉnh
         }
     }
+
+    // Extension method: Tạo phương thức mở rộng để thêm MyCustomMiddleware vào chuỗi middleware dễ dàng hơn.
+    // - Phương thức này sẽ đơn giản hóa việc gọi middleware bằng cách sử dụng app.UseMyCustomMiddleware() thay vì app.UseMiddleware<MyCustomMiddleware>().
+    public static class CustomMiddlewareExtension
+    {
+        public static IApplicationBuilder UseMyCustomMiddleware(this IApplicationBuilder app)
+        {
+            return app.UseMiddleware<MyCustomMiddleware>();
+        }
+    }
 }
